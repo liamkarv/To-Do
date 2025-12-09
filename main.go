@@ -1,6 +1,7 @@
 package main
 
 import (
+	"net/http"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,12 +18,24 @@ var todos = []todo{
 	{ID: "3", Item: "Breathe", Completed: false},
 }
 
-func getTodos(context *gin.Context){
+func addToDo(context *gin.Context){
+	var newToDo todo
 
+	if err := context.BindJSON(&newToDo); err != nil {
+		return
+	}
+
+	todos = append(todos, newToDo)
+	context.IndentedJSON(http.StatusCreated, newToDo)
+}
+
+func getToDos(context *gin.Context){
+	context.IndentedJSON(http.StatusOK, todos)
 }
 
 func main(){
 	router := gin.Default()
-	router.GET("/todos")
+	router.GET("/todos", getToDos)
+	router.POST("/todos", addToDo)
 	router.Run("localhost:8080")
 }
